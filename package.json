@@ -1,7 +1,7 @@
 {
   "name": "app-starter-project-with-webpack",
   "version": "1.0.0",
-  "description": "",
+  "description": "PWA untuk berbagi cerita dengan lokasi",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
@@ -10,8 +10,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "keywords": [],
-  "author": "YOUR_NAME <yourmail@mail.com>",
+  "keywords": ["pwa", "story", "dicoding", "submission"],
+  "author": "Vannesa Ayuni Riskita <f308d5x1933@student.devacademy.id>",
   "license": "ISC",
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
