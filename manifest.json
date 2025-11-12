@@ -24,10 +24,36 @@
   ],
   "screenshots": [
     {
-      "src": "./favicon.png",
+      "src": "./images/screenshot-wide.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Cerita",
+      "short_name": "Tambah",
+      "description": "Tambahkan cerita baru",
+      "url": "./#/add-story",
+      "icons": [
+        {
+          "src": "./favicon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cerita Favorit",
+      "short_name": "Favorit",
+      "description": "Lihat cerita favorit",
+      "url": "./#/favorites",
+      "icons": [
+        {
+          "src": "./favicon.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
