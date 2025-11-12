@@ -17,7 +17,6 @@ class AddStoryPresenter {
 
       this._view.showSubmitting();
 
-      // Try to submit online first
       try {
         await StoryAPI.addStory(storyData);
         this._view.showSuccess('Cerita berhasil ditambahkan!');

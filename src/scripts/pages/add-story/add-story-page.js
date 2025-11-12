@@ -24,14 +24,13 @@ class AddStoryPage {
     const photoInput = document.querySelector('#photo');
     const charCount = document.querySelector('#char-count');
 
-    // Character counter
+
     if (descriptionInput && charCount) {
       descriptionInput.addEventListener('input', () => {
         charCount.textContent = descriptionInput.value.length;
       });
     }
 
-    // Photo input handler
     if (photoInput) {
       photoInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -41,7 +40,7 @@ class AddStoryPage {
       });
     }
 
-    // Remove photo button
+
     document.addEventListener('click', (e) => {
       if (e.target.id === 'remove-photo-btn' || e.target.closest('#remove-photo-btn')) {
         this._removePhoto();
@@ -124,18 +123,17 @@ class AddStoryPage {
 
     if (!video || !canvas) return;
 
-    // Set canvas size to video size
+  
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Draw video frame to canvas
     const context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert canvas to blob
+
     canvas.toBlob((blob) => {
       if (blob) {
-        // Create file from blob
+
         const file = new File([blob], `camera-${Date.now()}.jpg`, { type: 'image/jpeg' });
         this._handlePhotoSelection(file);
         this._closeCamera();
@@ -146,7 +144,7 @@ class AddStoryPage {
   _handlePhotoSelection(file) {
     this._photoFile = file;
 
-    // Show preview
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = document.querySelector('#photo-preview');

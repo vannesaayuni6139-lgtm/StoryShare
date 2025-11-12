@@ -175,7 +175,8 @@ class IndexedDBHelper {
       const offlineData = {
         ...storyData,
         createdAt: new Date().toISOString(),
-        synced: false
+        synced: false,
+        retryCount: 0
       };
 
       const request = store.add(offlineData);
@@ -228,6 +229,53 @@ class IndexedDBHelper {
         console.error('Error clearing synced stories:', request.error);
         reject(request.error);
       };
+    });
+  }
+
+  async markStorySynced(storyId) {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([OFFLINE_STORIES_STORE], 'readwrite');
+      const store = transaction.objectStore(OFFLINE_STORIES_STORE);
+      const deleteRequest = store.delete(storyId);
+
+      deleteRequest.onsuccess = () => {
+        console.log('Offline story marked as synced and removed:', storyId);
+        resolve();
+      };
+
+      deleteRequest.onerror = () => {
+        console.error('Error marking story as synced:', deleteRequest.error);
+        reject(deleteRequest.error);
+      };
+    });
+  }
+
+  async incrementRetryCount(storyId) {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([OFFLINE_STORIES_STORE], 'readwrite');
+      const store = transaction.objectStore(OFFLINE_STORIES_STORE);
+      
+      const getRequest = store.get(storyId);
+      
+      getRequest.onsuccess = () => {
+        const story = getRequest.result;
+        if (story) {
+          story.retryCount = (story.retryCount || 0) + 1;
+          story.lastRetry = new Date().toISOString();
+          
+          const putRequest = store.put(story);
+          putRequest.onsuccess = () => resolve(story.retryCount);
+          putRequest.onerror = () => reject(putRequest.error);
+        } else {
+          resolve(0);
+        }
+      };
+
+      getRequest.onerror = () => reject(getRequest.error);
     });
   }
 

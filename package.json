@@ -10,6 +10,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
+  "homepage": "https://vannesaayuni6139-lgtm.github.io/StoryShare/",
   "keywords": ["pwa", "story", "dicoding", "submission"],
   "author": "Vannesa Ayuni Riskita <f308d5x1933@student.devacademy.id>",
   "license": "ISC",

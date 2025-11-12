@@ -146,32 +146,61 @@ class PushNotificationHelper {
 
   async sendSubscriptionToServer(subscription) {
     try {
-    
-      console.log('Subscription to be sent to server:', JSON.stringify(subscription));
-      
-      // Example implementation:
-      // const response = await fetch(`${CONFIG.BASE_URL}/subscribe`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      //   },
-      //   body: JSON.stringify(subscription)
-      // });
-      
-      // if (!response.ok) {
-      //   throw new Error('Failed to send subscription to server');
-      // }
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.warn('No auth token found, skipping subscription send');
+        return true;
+      }
+
+      const response = await fetch('https://story-api.dicoding.dev/v1/notifications/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          subscription: subscription.toJSON()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to subscribe: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Push subscription sent to server:', result);
+      return true;
     } catch (error) {
       console.error('Error sending subscription to server:', error);
+      throw error;
     }
   }
 
   
   async removeSubscriptionFromServer(subscription) {
     try {
-      console.log('Removing subscription from server');
-      
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.warn('No auth token found, skipping unsubscribe');
+        return;
+      }
+
+      const response = await fetch('https://story-api.dicoding.dev/v1/notifications/unsubscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          subscription: subscription.toJSON()
+        })
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to unsubscribe from server, but continuing locally');
+      } else {
+        console.log('Successfully unsubscribed from server');
+      }
     } catch (error) {
       console.error('Error removing subscription from server:', error);
     }
@@ -180,18 +209,29 @@ class PushNotificationHelper {
   
   async testNotification() {
     if (this.getPermission() !== 'granted') {
-      await this.requestPermission();
+      const permission = await this.requestPermission();
+      if (permission !== 'granted') {
+        throw new Error('Permission denied');
+      }
     }
 
-    if (this.getPermission() === 'granted') {
-      new Notification('StoryShare', {
-        body: 'Notifikasi push berhasil diaktifkan!',
-        icon: '/favicon.png',
-        badge: '/favicon.png',
-        tag: 'test-notification',
-        requireInteraction: false
+    
+    new Notification('StoryShare Test', {
+      body: 'Push notification berhasil diaktifkan!',
+      icon: './favicon.png',
+      badge: './favicon.png'
+    });
+
+  
+    if (this.registration) {
+      await this.registration.showNotification('StoryShare SW Test', {
+        body: 'Service Worker notification test',
+        icon: './favicon.png',
+        badge: './favicon.png'
       });
     }
+
+    return true;
   }
 }
 

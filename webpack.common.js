@@ -3,40 +3,34 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: {
-    app: path.resolve(__dirname, 'src/scripts/index.js'),
-  },
+  entry: './src/scripts/index.js',
   output: {
-    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-  },
-  module: {
-    rules: [
-      {
-        test: /\.(png|jpe?g|gif)$/i,
-        type: 'asset/resource',
-      },
-    ],
+    filename: 'app.bundle.js',
+    clean: true,
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'src/index.html'),
+      template: './src/index.html',
+      filename: 'index.html',
     }),
     new CopyWebpackPlugin({
-    patterns: [
-      {
-        from: path.resolve(__dirname, 'src/public/'),
-        to: path.resolve(__dirname, 'dist/'),
-      },
-      {
-        from: path.resolve(__dirname, 'manifest.json'),
-        to: path.resolve(__dirname, 'dist/'),
-      },
-      {
-        from: path.resolve(__dirname, 'sw.js'),
-        to: path.resolve(__dirname, 'dist/'),
-      },
-    ],
-  }),
+      patterns: [
+        {
+          from: './src/public/',
+          to: './',
+        },
+        {
+          from: './manifest.json',
+          to: './manifest.json',
+        },
+        {
+          from: './sw.js',
+          to: './sw.js',
+        },
+      ],
+    }),
   ],
 };
+
+

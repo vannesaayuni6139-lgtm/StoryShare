@@ -1,179 +1,126 @@
-const CACHE_NAME = 'storyshare-v1';
+const CACHE_NAME = 'storyshare-v3';
+const OFFLINE_URL = './index.html';
+const API_URL = 'https://story-api.dicoding.dev';
+
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app.bundle.js',
-  '/favicon.png',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://fonts.googleapis.com/css2?family=Libertinus+Serif+Display&display=swap'
+  './',
+  './index.html',
+  './manifest.json',
+  './favicon.png',
+  './app.bundle.js',
 ];
 
-
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
+  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activate event - cleanup old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...');
+  console.log('[SW] Activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
           }
         })
-      );
-    }).then(() => self.clients.claim())
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
+  if (request.method !== 'GET') return;
 
-  if (url.origin === 'https://story-api.dicoding.dev') {
+
+  if (request.url.startsWith(API_URL)) {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          
-          const responseClone = response.clone();
-          
-  
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
           return response;
         })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+
+  event.respondWith(
+    caches.match(request).then((response) =>
+      response ||
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+          }
+          return networkResponse;
+        })
         .catch(() => {
-    
-          return caches.match(request);
+          if (request.mode === 'navigate') return caches.match(OFFLINE_URL);
+          return new Response('Offline', { status: 503 });
         })
-    );
-  } 
-  
-  else {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            return response;
-          }
-          
-          return fetch(request).then((response) => {
-          
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-            
-            return response;
-          });
-        })
-    );
-  }
-});
-
-// Push Notification event
-self.addEventListener('push', (event) => {
-  console.log('[Service Worker] Push received');
-  
-  let notification = {
-    title: 'StoryShare',
-    body: 'Ada update baru!',
-    icon: '/favicon.png',
-    badge: '/favicon.png',
-    data: {}
-  };
-
-  
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      notification = {
-        title: data.title || notification.title,
-        body: data.body || notification.body,
-        icon: data.icon || notification.icon,
-        badge: data.badge || notification.badge,
-        data: data.data || {},
-        actions: data.actions || [
-          {
-            action: 'open',
-            title: 'Lihat Cerita'
-          },
-          {
-            action: 'close',
-            title: 'Tutup'
-          }
-        ]
-      };
-    } catch (error) {
-      console.error('[Service Worker] Error parsing notification data:', error);
-    }
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(notification.title, {
-      body: notification.body,
-      icon: notification.icon,
-      badge: notification.badge,
-      data: notification.data,
-      actions: notification.actions
-    })
+    )
   );
 });
 
 
-self.addEventListener('notificationclick', (event) => {
-  console.log('[Service Worker] Notification clicked:', event.action);
-  
-  event.notification.close();
-
-  if (event.action === 'open') {
-    
-    const storyId = event.notification.data?.storyId;
-    const url = storyId ? `/#/story/${storyId}` : '/';
-    
-    event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true })
-        .then((clientList) => {
-          
-          for (const client of clientList) {
-            if (client.url.includes(self.location.origin) && 'focus' in client) {
-              client.navigate(url);
-              return client.focus();
-            }
-          }
-          
-          if (clients.openWindow) {
-            return clients.openWindow(url);
-          }
-        })
-    );
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push received');
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch (err) {
+    data = { title: 'StoryShare', body: 'Ada cerita baru!' };
   }
+
+  const title = data.title || 'StoryShare';
+  const options = {
+    body: data.body || 'Ada cerita baru yang menarik!',
+    icon: './favicon.png',
+    badge: './favicon.png',
+    data: { url: data.url || './' },
+    actions: [
+      { action: 'open', title: 'Lihat' },
+      { action: 'close', title: 'Tutup' },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked');
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  const targetUrl = event.notification.data?.url || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(self.registration.scope) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
+    })
+  );
+});
+
 self.addEventListener('sync', (event) => {
-  console.log('[Service Worker] Background sync:', event.tag);
-  
+  console.log('[SW] Background sync triggered:', event.tag);
   if (event.tag === 'sync-stories') {
     event.waitUntil(syncOfflineStories());
   }
@@ -181,95 +128,81 @@ self.addEventListener('sync', (event) => {
 
 async function syncOfflineStories() {
   try {
-    
     const db = await openDatabase();
-
     const stories = await new Promise((resolve, reject) => {
       const tx = db.transaction('offline-stories', 'readonly');
       const store = tx.objectStore('offline-stories');
-      const request = store.getAll();
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
     });
 
     if (stories.length === 0) {
-      console.log('[Service Worker] No offline stories to sync');
+      console.log('[SW] Tidak ada cerita offline untuk disinkronkan.');
       return;
     }
 
-    console.log(`[Service Worker] Syncing ${stories.length} offline stories`);
+    console.log(`[SW] Menyinkronkan ${stories.length} cerita...`);
+    let successCount = 0;
 
-    let syncedCount = 0;
-
-  
     for (const story of stories) {
       try {
-      
-        const photoBlob = await base64ToBlob(story.photoBase64, story.photoType);
-
+        const blob = await base64ToBlob(story.photoBase64, story.photoType);
         const formData = new FormData();
         formData.append('description', story.description);
-        formData.append('photo', photoBlob, story.photoName);
-
+        formData.append('photo', blob, story.photoName);
         if (story.lat && story.lon) {
           formData.append('lat', story.lat);
           formData.append('lon', story.lon);
         }
 
-        const response = await fetch('https://story-api.dicoding.dev/v1/stories', {
+        const res = await fetch(`${API_URL}/v1/stories`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${story.token}`
-          },
-          body: formData
+          headers: { Authorization: `Bearer ${story.token}` },
+          body: formData,
         });
 
-        if (response.ok) {
-          // Remove from IndexedDB 
-          await new Promise((resolve, reject) => {
-            const deleteTx = db.transaction('offline-stories', 'readwrite');
-            const deleteStore = deleteTx.objectStore('offline-stories');
-            const deleteRequest = deleteStore.delete(story.id);
-
-            deleteRequest.onsuccess = () => resolve();
-            deleteRequest.onerror = () => reject(deleteRequest.error);
-          });
-
-          console.log('[Service Worker] Story synced and removed:', story.id);
-          syncedCount++;
-        } else {
-          console.error('[Service Worker] Failed to sync story, server error:', response.status);
+        if (res.ok) {
+          await deleteStoryFromDB(db, story.id);
+          successCount++;
         }
-      } catch (error) {
-        console.error('[Service Worker] Failed to sync story:', error);
+      } catch (err) {
+        console.error('[SW] Gagal upload story offline:', err);
       }
     }
 
-
-    if (syncedCount > 0) {
+    if (successCount > 0) {
       self.registration.showNotification('StoryShare', {
-        body: `${syncedCount} cerita berhasil disinkronkan!`,
-        icon: '/favicon.png',
-        badge: '/favicon.png'
+        body: `${successCount} cerita berhasil disinkronkan!`,
+        icon: './favicon.png',
+        badge: './favicon.png',
       });
     }
-
-  } catch (error) {
-    console.error('[Service Worker] Error in sync:', error);
+  } catch (err) {
+    console.error('[SW] Gagal sinkronisasi offline:', err);
   }
 }
 
 function base64ToBlob(base64, mimeType) {
   return fetch(base64)
-    .then(res => res.blob())
-    .then(blob => new Blob([blob], { type: mimeType }));
+    .then((res) => res.blob())
+    .then((blob) => new Blob([blob], { type: mimeType }));
 }
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('storyshare-db', 1);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    const req = indexedDB.open('storyshare-db', 1);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function deleteStoryFromDB(db, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('offline-stories', 'readwrite');
+    const store = tx.objectStore('offline-stories');
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
