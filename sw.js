@@ -1,4 +1,4 @@
-const CACHE_NAME = 'storyshare-v5';
+const CACHE_NAME = 'storyshare-v6';
 
 const OFFLINE_URL = BASE_URL + 'index.html';
 
@@ -53,11 +53,26 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
+          if (response.ok) {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
+          }
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => {
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return new Response(JSON.stringify({
+              error: true,
+              message: 'Offline mode - data not available'
+            }), {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          });
+        })
     );
     return;
   }

@@ -46,81 +46,14 @@ IndexedDBHelper.init().catch(error => {
   console.error('Failed to initialize IndexedDB:', error);
 });
 
-let deferredPrompt;
-let installButtonShown = false;
-
+// PWA Install Prompt - Let browser handle native install banner
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('beforeinstallprompt event fired');
-  e.preventDefault();
-  deferredPrompt = e;
-
-  // Show install button immediately when prompt is available
-  showInstallButton();
+  console.log('beforeinstallprompt event fired - native install banner available');
+  // Don't prevent the event, let the browser show the native install prompt
 });
 
-function showInstallButton() {
-  if (document.getElementById('install-btn') || installButtonShown) {
-    return;
-  }
-
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-    console.log('App is already installed');
-    return;
-  }
-
-  const installBtn = document.createElement('button');
-  installBtn.className = 'install-btn';
-  installBtn.id = 'install-btn';
-  installBtn.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-      <polyline points="7 10 12 15 17 10"></polyline>
-      <line x1="12" y1="15" x2="12" y2="3"></line>
-    </svg>
-    <span>Install App</span>
-  `;
-
-  installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-      alert('Install prompt not available. Try refreshing the page.');
-      return;
-    }
-
-    try {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to install prompt: ${outcome}`);
-
-      if (outcome === 'accepted') {
-        console.log('App installation accepted');
-        installButtonShown = true;
-      } else {
-        console.log('App installation dismissed');
-      }
-
-      deferredPrompt = null;
-      installBtn.remove();
-    } catch (error) {
-      console.error('Error during install prompt:', error);
-      alert('Error during installation. Please try again.');
-      deferredPrompt = null;
-      installBtn.remove();
-    }
-  });
-
-  document.body.appendChild(installBtn);
-  installButtonShown = true;
-  console.log('Install button shown');
-}
-
 window.addEventListener('appinstalled', () => {
-  console.log('PWA was installed successfully');
-  deferredPrompt = null;
-
-  const installBtn = document.getElementById('install-btn');
-  if (installBtn) {
-    installBtn.remove();
-  }
+  console.log('PWA was installed successfully via native prompt');
 });
 
 
