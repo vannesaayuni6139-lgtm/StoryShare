@@ -6,12 +6,17 @@
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
     "serve": "http-server dist",
-    "start": "webpack serve --config webpack.dev.js --open",
+    "start": "npx kill-port 9000 && webpack serve --config webpack.dev.js --open",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
   "homepage": "https://vannesaayuni6139-lgtm.github.io/StoryShare/",
-  "keywords": ["pwa", "story", "dicoding", "submission"],
+  "keywords": [
+    "pwa",
+    "story",
+    "dicoding",
+    "submission"
+  ],
   "author": "Vannesa Ayuni Riskita <f308d5x1933@student.devacademy.id>",
   "license": "ISC",
   "devDependencies": {
@@ -23,6 +28,7 @@
     "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.6.3",
     "http-server": "^14.1.1",
+    "kill-port": "^2.0.1",
     "mini-css-extract-plugin": "^2.9.2",
     "style-loader": "^4.0.0",
     "webpack": "^5.98.0",

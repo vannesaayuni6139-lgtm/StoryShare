@@ -4,21 +4,21 @@ import PushNotificationHelper from './utils/push-notification.js';
 import IndexedDBHelper from './utils/indexeddb-helper.js';
 import StoryAPI from './data/api.js';
 
-const app = new App({
-  drawer: {
-    button: document.querySelector('#drawer-button'),
-    nav: document.querySelector('#navigation-drawer'),
-  },
-  content: document.querySelector('#main-content'),
-});
-
-
-IndexedDBHelper.init().catch(error => {
-  console.error('Failed to initialize IndexedDB:', error);
-});
-
+let appInstance;
 
 document.addEventListener('DOMContentLoaded', () => {
+  appInstance = new App({
+    drawer: {
+      button: document.querySelector('#drawer-button'),
+      nav: document.querySelector('#navigation-drawer'),
+    },
+    content: document.querySelector('#main-content'),
+  });
+
+  // Initialize app rendering
+  appInstance.renderPage();
+
+  // Setup skip link functionality
   const skipLink = document.querySelector('.skip-to-content');
   const mainContent = document.querySelector('#main-content');
 
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
       mainContent.focus();
       mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Remove tabindex after focus to restore normal tab order
       mainContent.addEventListener('blur', () => {
         mainContent.removeAttribute('tabindex');
       }, { once: true });
@@ -37,12 +36,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-window.addEventListener('DOMContentLoaded', () => {
-  app.renderPage();
+window.addEventListener('hashchange', () => {
+  if (appInstance) {
+    appInstance.renderPage();
+  }
 });
 
-window.addEventListener('hashchange', () => {
-  app.renderPage();
+IndexedDBHelper.init().catch(error => {
+  console.error('Failed to initialize IndexedDB:', error);
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
+
+      const installBtn = document.createElement('button');
+      installBtn.className = 'install-btn';
+      installBtn.id = 'install-btn';
+      installBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Install App</span>
+      `;
+
+      installBtn.addEventListener('click', () => {
+        alert('Install button clicked! In real PWA, this would show the install prompt.');
+        installBtn.remove();
+      });
+
+      document.body.appendChild(installBtn);
+    }
+  }, 2000); 
 });
 
 

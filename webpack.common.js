@@ -25,8 +25,8 @@ module.exports = {
           to: './manifest.json',
         },
         {
-          from: './sw.js',
-          to: './sw.js',
+          from: 'sw.js',
+          to: 'sw.js',
         },
       ],
     }),

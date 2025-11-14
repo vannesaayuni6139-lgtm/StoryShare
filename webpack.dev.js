@@ -17,12 +17,15 @@ module.exports = merge(common, {
   },
   devServer: {
     static: path.resolve(__dirname, 'dist'),
-    port: 9000,
+    port: 9001,
+    host: '0.0.0.0',
     client: {
       overlay: {
         errors: true,
         warnings: true,
       },
     },
+    server: 'http',
+    allowedHosts: 'all',
   },
 });

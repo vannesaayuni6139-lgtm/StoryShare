@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Screenshot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .screenshot-container {
+            width: 1280px;
+            height: 720px;
+            background: white;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #4A90E2;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        
+        .brand-name {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .story-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .story-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .story-image {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+        }
+        
+        .story-info h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .story-info p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .map-container {
+            background: #e0e0e0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+        }
+        
+        .footer {
+            background: #f5f5f5;
+            padding: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .instructions {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+        }
+        
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        button:hover {
+            background: #357ABD;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h2>Cara Membuat Screenshot:</h2>
+        <p>1. Tekan F12 untuk buka DevTools</p>
+        <p>2. Klik icon Device Toolbar</p>
+        <p>3. Set ukuran: 1280 x 720</p>
+        <p>4. Klik 3 titik → Capture Screenshot</p>
+        <p>5. Save sebagai: screenshot-wide.png</p>
+        <p>6. Pindahkan ke folder: public/images/</p>
+        <button onclick="alert('Gunakan DevTools (F12) → Toggle Device Toolbar → Set 1280x720 → Capture Screenshot')">
+        </button>
+    </div>
+
+    <div class="screenshot-container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1 class="brand-name">StoryShare</h1>
+        </div>
+        
+        <div class="content">
+            <div class="story-list">
+                <div class="story-card">
+                    <div class="story-image"></div>
+                    <div class="story-info">
+                        <h3>Liburan di Bali</h3>
+                        <p>Menikmati sunset di pantai Kuta bersama keluarga. Pengalaman yang tak terlupakan!</p>
+                    </div>
+                </div>
+                
+                <div class="story-card">
+                    <div class="story-image"></div>
+                    <div class="story-info">
+                        <h3>Mendaki Gunung Bromo</h3>
+                        <p>Sunrise di Bromo sangat menakjubkan. Pemandangan yang luar biasa indah!</p>
+                    </div>
+                </div>
+                
+                <div class="story-card">
+                    <div class="story-image"></div>
+                    <div class="story-info">
+                        <h3>Kuliner Jogja</h3>
+                        <p>Mencicipi gudeg dan bakpia khas Yogyakarta. Rasanya sangat autentik!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="map-container">
+            Peta Lokasi Cerita
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 2025 StoryShare - Bagikan cerita, bagikan pengalaman
+        </div>
+    </div>
+</body>
+</html>
