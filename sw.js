@@ -1,14 +1,19 @@
-const CACHE_NAME = 'storyshare-v3';
-const OFFLINE_URL = './index.html';
+const CACHE_NAME = 'storyshare-v4';
+
+const OFFLINE_URL = BASE_URL + 'index.html';
+
 const API_URL = 'https://story-api.dicoding.dev';
 
+const BASE_URL = self.location.origin + self.location.pathname.replace(/sw\.js$/, '');
+
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './favicon.png',
-  './app.bundle.js',
+  BASE_URL,
+  BASE_URL + 'index.html',
+  BASE_URL + 'manifest.json',
+  BASE_URL + 'favicon.png',
+  BASE_URL + 'app.bundle.js',
 ];
+
 
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing...');
