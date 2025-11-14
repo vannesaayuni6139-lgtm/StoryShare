@@ -94,7 +94,7 @@ class App {
   async renderPage() {
     const url = getActiveRoute();
 
-   
+
     const publicRoutes = ['/login'];
     if (!publicRoutes.includes(url) && !StoryAPI.isAuthenticated()) {
       window.location.hash = '#/login';

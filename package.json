@@ -6,7 +6,7 @@
     "build": "webpack --config webpack.prod.js",
     "start-dev": "webpack serve --config webpack.dev.js",
     "serve": "http-server dist",
-    "start": "npx kill-port 9000 && webpack serve --config webpack.dev.js --open",
+    "start": "webpack serve --config webpack.dev.js --open",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

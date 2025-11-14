@@ -46,44 +46,15 @@ IndexedDBHelper.init().catch(error => {
   console.error('Failed to initialize IndexedDB:', error);
 });
 
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
-
-      const installBtn = document.createElement('button');
-      installBtn.className = 'install-btn';
-      installBtn.id = 'install-btn';
-      installBtn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        <span>Install App</span>
-      `;
-
-      installBtn.addEventListener('click', () => {
-        alert('Install button clicked! In real PWA, this would show the install prompt.');
-        installBtn.remove();
-      });
-
-      document.body.appendChild(installBtn);
-    }
-  }, 2000); 
-});
-
-
 let deferredPrompt;
-let installButtonShown = false;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   console.log('beforeinstallprompt event fired');
   e.preventDefault();
   deferredPrompt = e;
-  
-  if (!installButtonShown) {
-    showInstallButton();
-  }
+
+  // Show install button immediately when prompt is available
+  showInstallButton();
 });
 
 function showInstallButton() {
@@ -96,57 +67,58 @@ function showInstallButton() {
     return;
   }
 
-  setTimeout(() => {
-    const installBtn = document.createElement('button');
-    installBtn.className = 'install-btn';
-    installBtn.id = 'install-btn';
-    installBtn.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-      <span>Install App</span>
-    `;
+  const installBtn = document.createElement('button');
+  installBtn.className = 'install-btn';
+  installBtn.id = 'install-btn';
+  installBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="7 10 12 15 17 10"></polyline>
+      <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    <span>Install App</span>
+  `;
 
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      alert('Install prompt not available. Try refreshing the page.');
+      return;
+    }
 
+    try {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       console.log(`User response to install prompt: ${outcome}`);
 
       if (outcome === 'accepted') {
-        installButtonShown = true;
+        console.log('App installation accepted');
+      } else {
+        console.log('App installation dismissed');
       }
 
       deferredPrompt = null;
       installBtn.remove();
-    });
+    } catch (error) {
+      console.error('Error during install prompt:', error);
+      alert('Error during installation. Please try again.');
+      deferredPrompt = null;
+      installBtn.remove();
+    }
+  });
 
-   
-    document.body.insertBefore(installBtn, document.body.firstChild);
-    installButtonShown = true;
-  }, 1000);
+  document.body.appendChild(installBtn);
+  console.log('Install button shown');
 }
 
-
 window.addEventListener('appinstalled', () => {
-  console.log('PWA was installed');
+  console.log('PWA was installed successfully');
   deferredPrompt = null;
-  installButtonShown = true;
 
   const installBtn = document.getElementById('install-btn');
   if (installBtn) {
     installBtn.remove();
   }
 });
-
-
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-  console.log('App is running in standalone mode');
-  installButtonShown = true;
-}
 
 
 if ('serviceWorker' in navigator) {
