@@ -54,12 +54,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  // Show install button after a short delay to ensure page is fully loaded
-  setTimeout(() => {
-    if (!installButtonShown) {
-      showInstallButton();
-    }
-  }, 1000);
+  // Show install button immediately when prompt is available
+  showInstallButton();
 });
 
 function showInstallButton() {

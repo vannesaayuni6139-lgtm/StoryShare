@@ -1,4 +1,4 @@
-const CACHE_NAME = 'storyshare-v4';
+const CACHE_NAME = 'storyshare-v5';
 
 const OFFLINE_URL = BASE_URL + 'index.html';
 
@@ -12,6 +12,9 @@ const urlsToCache = [
   BASE_URL + 'manifest.json',
   BASE_URL + 'favicon.png',
   BASE_URL + 'app.bundle.js',
+  BASE_URL + 'images/screenshot-wide.png',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
 ];
 
 
