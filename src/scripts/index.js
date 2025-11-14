@@ -47,18 +47,23 @@ IndexedDBHelper.init().catch(error => {
 });
 
 let deferredPrompt;
+let installButtonShown = false;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   console.log('beforeinstallprompt event fired');
   e.preventDefault();
   deferredPrompt = e;
 
-  // Show install button immediately when prompt is available
-  showInstallButton();
+  // Show install button after a short delay to ensure page is fully loaded
+  setTimeout(() => {
+    if (!installButtonShown) {
+      showInstallButton();
+    }
+  }, 1000);
 });
 
 function showInstallButton() {
-  if (document.getElementById('install-btn')) {
+  if (document.getElementById('install-btn') || installButtonShown) {
     return;
   }
 
@@ -92,6 +97,7 @@ function showInstallButton() {
 
       if (outcome === 'accepted') {
         console.log('App installation accepted');
+        installButtonShown = true;
       } else {
         console.log('App installation dismissed');
       }
@@ -107,6 +113,7 @@ function showInstallButton() {
   });
 
   document.body.appendChild(installBtn);
+  installButtonShown = true;
   console.log('Install button shown');
 }
 
